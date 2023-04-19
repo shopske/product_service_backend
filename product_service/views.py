@@ -33,3 +33,7 @@ def get_products(request):
             }
             product_list.append(product)
         return Response(product_list, status=status.HTTP_200_OK)
+
+
+
+
