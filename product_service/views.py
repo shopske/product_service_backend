@@ -1,6 +1,7 @@
 from rest_framework import status
 from rest_framework.decorators import api_view
-from .models import Product
+from .models import Product, OrderItem, Order, BillingAddress, Payment, Refund, Category
+from .form import CheckoutForm, RefundForm
 from rest_framework.response import Response
 import jsonschema
 
@@ -15,13 +16,17 @@ def get_products(request):
             product = {
                 'id': i.id,
                 'name': i.name,
+                'price': i.price,
                 'category': {
                     'id': i.category.id,
                     'name': i.category.name
                 },
-                'photo': i.photoUrls,
+                'description': i.description_short,
+                'photo': i.image,
                 'tags': list(i.tags.all().values('id', 'name')),
-                'status': i.status
+                'status': i.status,
+                'stock': i.stock_no
+
             }
             product_list.append(product)
         return Response(product_list, status=status.HTTP_200_OK)
@@ -36,12 +41,15 @@ def create_product(request):
             "type": "object",
             "properties": {
                 "name": {"type": "string"},
+                "price": {"type": "float"},
                 "category": {"type": "string"},
+                "description": {"type": "string"},
                 "photo": {"type": "array"},
                 "tags": {"type": "array"},
-                "status": {"type": "string"}
+                "status": {"type": "string"},
+                "stock": {"type": "int"}
             },
-            "required": ["name", "category", "photo", "tags", "status"]
+            "required": ["name", "price", "category", "description", "photo", "tags", "status", "stock"]
         }
         try:
             jsonschema.validate(product, product_schema)
@@ -49,9 +57,12 @@ def create_product(request):
             return Response({'message': str(e)}, status=status.HTTP_400_BAD_REQUEST)
         product = Product.objects.create(
             name=product['name'],
+            price=product['price'],
             category=product['category'],
+            description=product['description'],
             photo=product['photo'],
-            status=product['status']
+            status=product['status'],
+            stock=product['stock']
         )
         product.save()
         product.tags.set(product['tags'])
@@ -68,13 +79,16 @@ def get_product_by_status(request, product_status):
             product = {
                 'id': i.id,
                 'name': i.name,
+                'price': i.price,
                 'category': {
                     'id': i.category.id,
                     'name': i.category.name
                 },
-                'photo': i.photoUrls,
+                'description': i.description_short,
+                'photo': i.image,
                 'tags': list(i.tags.all().values('id', 'name')),
-                'status': i.status
+                'status': i.status,
+                'stock': i.stock_no
             }
             product_list.append(product)
         return Response(product_list, status=status.HTTP_200_OK)
@@ -90,13 +104,16 @@ def get_product_by_tags(request, product_tags):
             product = {
                 'id': i.id,
                 'name': i.name,
+                'price': i.price,
                 'category': {
                     'id': i.category.id,
                     'name': i.category.name
                 },
-                'photo': i.photoUrls,
+                'description': i.description_short,
+                'photo': i.image,
                 'tags': list(i.tags.all().values('id', 'name')),
-                'status': i.status
+                'status': i.status,
+                'stock': i.stock_no
             }
             product_list.append(product)
         return Response(product_list, status=status.HTTP_200_OK)
@@ -113,13 +130,16 @@ def get_product_by_id(request, product_id):
         product = {
             'id': product.id,
             'name': product.name,
+            'price': product.price,
             'category': {
                 'id': product.category.id,
                 'name': product.category.name
             },
+            'description': product.description_short,
             'photo': product.photoUrls,
             'tags': list(product.tags.all().values('id', 'name')),
-            'status': product.status
+            'status': product.status,
+            'stock': product.stock_no
         }
         return Response(product, status=status.HTTP_200_OK)
 
@@ -133,12 +153,15 @@ def update_product(request, product_id):
             "type": "object",
             "properties": {
                 "name": {"type": "string"},
+                "price": {"type": "float"},
                 "category": {"type": "string"},
+                "description": {"type": "string"},
                 "photo": {"type": "array"},
                 "tags": {"type": "array"},
-                "status": {"type": "string"}
+                "status": {"type": "string"},
+                "stock": {"type": "int"}
             },
-            "required": ["name", "category", "photo", "tags", "status"]
+            "required": ["name", "price", "category", "description", "photo", "tags", "status", "stock"]
         }
         try:
             jsonschema.validate(product, product_schema)
