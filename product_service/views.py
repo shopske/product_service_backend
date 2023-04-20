@@ -3,7 +3,6 @@ from rest_framework.decorators import api_view
 from .models import Product, OrderItem, Order, BillingAddress, Payment, Refund, Category
 from .form import CheckoutForm, RefundForm
 from rest_framework.response import Response
-import jsonschema
 from .serializers import ProductSerializer
 
 
