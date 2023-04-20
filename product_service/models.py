@@ -1,7 +1,7 @@
+from django.contrib.auth.models import User
 from django.db import models
 from django.shortcuts import reverse
 from django.conf import settings
-
 
 STATUS = (
     ('B', 'Billing'),
@@ -35,8 +35,10 @@ class Category(models.Model):
 
 
 class Tag(models.Model):
-    id = models.IntegerField(primary_key=True)
     name = models.CharField(max_length=100)
+
+    def __str__(self):
+        return self.name
 
 
 class Product(models.Model):
@@ -80,7 +82,7 @@ class OrderItem(models.Model):
 
 
 class Order(models.Model):
-    user = models.ForeignKey(settings.AUTH_USER_MODEL,
+    user = models.ForeignKey(User,
                              on_delete=models.CASCADE)
     ref_code = models.CharField(max_length=20)
     items = models.ManyToManyField(OrderItem)
@@ -109,7 +111,7 @@ class Order(models.Model):
 
 
 class BillingAddress(models.Model):
-    user = models.ForeignKey(settings.AUTH_USER_MODEL,
+    user = models.ForeignKey(User,
                              on_delete=models.CASCADE)
     street_address = models.CharField(max_length=100)
     apartment_address = models.CharField(max_length=100)
