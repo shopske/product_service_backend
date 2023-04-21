@@ -48,11 +48,9 @@ class Product(models.Model):
     tags = models.ManyToManyField(Tag)
     category = models.ForeignKey(Category, on_delete=models.CASCADE)
     slug = models.SlugField()
-    stock_no = models.CharField(max_length=10)
-    description_short = models.CharField(max_length=50)
-    description_long = models.TextField()
+    description = models.CharField(max_length=50)
     image = models.ImageField()
-    is_active = models.BooleanField(default=True)
+    is_active = models.CharField(max_length=20)
 
     def __str__(self):
         return self.name
@@ -68,9 +66,7 @@ class Product(models.Model):
 
 
 class OrderItem(models.Model):
-    user = models.ForeignKey(settings.AUTH_USER_MODEL,
-                             on_delete=models.CASCADE)
-    ordered = models.BooleanField(default=False)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     quantity = models.IntegerField(default=1)
 
@@ -82,23 +78,18 @@ class OrderItem(models.Model):
 
 
 class Order(models.Model):
-    user = models.ForeignKey(User,
-                             on_delete=models.CASCADE)
-    ref_code = models.CharField(max_length=20)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
     items = models.ManyToManyField(OrderItem)
     start_date = models.DateTimeField(auto_now_add=True)
     ordered_date = models.DateTimeField()
-    ordered = models.BooleanField(default=False)
+    ordered_status = models.BooleanField(default=False)
     shipping_address = models.ForeignKey(
         'BillingAddress', related_name='shipping_address', on_delete=models.SET_NULL, blank=True, null=True)
     billing_address = models.ForeignKey(
         'BillingAddress', related_name='billing_address', on_delete=models.SET_NULL, blank=True, null=True)
     payment = models.ForeignKey(
         'Payment', on_delete=models.SET_NULL, blank=True, null=True)
-    being_delivered = models.BooleanField(default=False)
-    received = models.BooleanField(default=False)
     refund_requested = models.BooleanField(default=False)
-    refund_granted = models.BooleanField(default=False)
 
     def __str__(self):
         return self.user.username
@@ -141,7 +132,6 @@ class Payment(models.Model):
 class Refund(models.Model):
     order = models.ForeignKey(Order, on_delete=models.CASCADE)
     reason = models.TextField()
-    accepted = models.BooleanField(default=False)
     email = models.EmailField()
 
     def __str__(self):

@@ -1,11 +1,11 @@
 from rest_framework import status
 from rest_framework.decorators import api_view
 from .models import Product, OrderItem, Order, BillingAddress, Payment, Refund, Category
-from .form import CheckoutForm, RefundForm
 from rest_framework.response import Response
 from .serializers import ProductSerializer
 
 
+# ////// Product /////
 @api_view(['GET'])
 def get_products(request):
     """Get all products."""
@@ -81,3 +81,57 @@ def delete_product(request, product_id):
             return Response({'message': 'Product not found.'}, status=status.HTTP_404_NOT_FOUND)
         product.delete()
         return Response({'message': 'Product deleted.'}, status=status.HTTP_204_NO_CONTENT)
+
+
+# ////// Order /////
+@api_view(['POST'])
+def create_order(request):
+    """Create an order."""
+    if request.method == 'POST':
+        serializer = ProductSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['PUT'])
+def update_order(request, order_id):
+    """Update an order."""
+    if request.method == 'PUT':
+        try:
+            orders = Order.objects.get(id=order_id)
+        except Order.DoesNotExist:
+            return Response({'message': 'Order not found.'}, status=status.HTTP_404_NOT_FOUND)
+        serializer = ProductSerializer(orders, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['GET'])
+def get_order(request):
+    """Get all order."""
+    if request.method == 'GET':
+        orders = Order.objects.all()
+        serializer = ProductSerializer(orders, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+@api_view(['GET'])
+def get_order_by_start_date(request, start_date):
+    """Get all order by started date."""
+    if request.method == 'GET':
+        orders = Order.objects.filter(start=start_date)
+        serializer = ProductSerializer(orders, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+@api_view(['GET'])
+def get_order_by_ordered_date(request, ordered_date):
+    """Get all order by ordered date."""
+    if request.method == 'GET':
+        orders = Order.objects.filter(order=ordered_date)
+        serializer = ProductSerializer(orders, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
