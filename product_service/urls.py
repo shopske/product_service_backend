@@ -12,7 +12,7 @@ urlpatterns = [
     path('<int:product_id>', views.get_product_by_id),
     path('<int:product_id>/update', views.update_product),
     path('<int:product_id>/delete', views.delete_product),
-    path('', views.get_order),
+    path('order', views.get_order),
     path('order/create', views.create_order),
     path('<int:order_id>/update', views.update_order),
     path('findByStartDate/<date:start_date>', views.get_order_by_start_date),
