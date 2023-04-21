@@ -2,7 +2,7 @@ from rest_framework import status
 from rest_framework.decorators import api_view
 from .models import Product, OrderItem, Order, BillingAddress, Payment, Refund, Category
 from rest_framework.response import Response
-from .serializers import ProductSerializer
+from .serializers import ProductSerializer, OrderSerializer
 
 
 # ////// Product /////
@@ -88,7 +88,7 @@ def delete_product(request, product_id):
 def create_order(request):
     """Create an order."""
     if request.method == 'POST':
-        serializer = ProductSerializer(data=request.data)
+        serializer = OrderSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -103,7 +103,7 @@ def update_order(request, order_id):
             orders = Order.objects.get(id=order_id)
         except Order.DoesNotExist:
             return Response({'message': 'Order not found.'}, status=status.HTTP_404_NOT_FOUND)
-        serializer = ProductSerializer(orders, data=request.data)
+        serializer = OrderSerializer(orders, data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_200_OK)
@@ -115,7 +115,7 @@ def get_order(request):
     """Get all order."""
     if request.method == 'GET':
         orders = Order.objects.all()
-        serializer = ProductSerializer(orders, many=True)
+        serializer = OrderSerializer(orders, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
@@ -124,7 +124,7 @@ def get_order_by_start_date(request, start_date):
     """Get all order by started date."""
     if request.method == 'GET':
         orders = Order.objects.filter(start=start_date)
-        serializer = ProductSerializer(orders, many=True)
+        serializer = OrderSerializer(orders, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
@@ -133,5 +133,5 @@ def get_order_by_ordered_date(request, ordered_date):
     """Get all order by ordered date."""
     if request.method == 'GET':
         orders = Order.objects.filter(order=ordered_date)
-        serializer = ProductSerializer(orders, many=True)
+        serializer = OrderSerializer(orders, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
