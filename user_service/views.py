@@ -1,6 +1,11 @@
+from django.contrib import messages
+from django.contrib.auth import login, authenticate, logout
+from django.contrib.auth.forms import AuthenticationForm
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.decorators import api_view
+
+from .forms import UserForm
 from .models import UserProfile
 from .serializers import UserSerializer
 
@@ -47,19 +52,33 @@ def get_user_by_username(request, user_name):
 @api_view(['POST'])
 def create_user(request):
     """Create a user."""
-    if request.method == 'POST':
-        serializer = UserSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    if request.method == "POST":
+        form = UserForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+            login(request, user)
+            messages.success(request, "Registration successful.")
+        messages.error(request, "Unsuccessful registration. Invalid information.")
 
 
 def login_required(request):
     """Login required."""
-    pass
+    if request.method == "POST":
+        form = AuthenticationForm(request, data=request.POST)
+        if form.is_valid():
+            username = form.cleaned_data.get('username')
+            password = form.cleaned_data.get('password')
+            user = authenticate(username=username, password=password)
+            if user is not None:
+                login(request, user)
+                messages.info(request, f"You are now logged in as {username}.")
+            else:
+                messages.error(request, "Invalid username or password.")
+        else:
+            messages.error(request, "Invalid username or password.")
 
 
 def logout_required(request):
     """Logout required."""
-    pass
+    logout(request)
+    messages.info(request, "You have successfully logged out.")
