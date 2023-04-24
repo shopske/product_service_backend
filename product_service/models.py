@@ -24,7 +24,7 @@ class Category(models.Model):
     title = models.CharField(max_length=100)
     slug = models.SlugField()
     description = models.TextField()
-    image = models.ImageField()
+    image = models.CharField(max_length=200)
     is_active = models.BooleanField(default=True)
 
     def __str__(self):
@@ -49,7 +49,7 @@ class Product(models.Model):
     category = models.ForeignKey(Category, on_delete=models.CASCADE)
     slug = models.SlugField()
     description = models.CharField(max_length=50)
-    image = models.ImageField()
+    image = models.CharField(max_length=200)
     is_active = models.CharField(max_length=20)
 
     def __str__(self):
